@@ -22,7 +22,7 @@ pub fn part_one(input: &str) -> Option<u32> {
     let sum_of_differences: u32 = list_a
         .iter()
         .zip(list_b.iter())
-        .map(|(a, b)| (*a as i32 - *b as i32).abs() as u32)
+        .map(|(a, b)| (*a as i32 - *b as i32).unsigned_abs())
         .sum();
 
     Some(sum_of_differences)
