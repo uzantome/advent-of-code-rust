@@ -60,7 +60,36 @@ fn is_safe(report: &[i32]) -> bool {
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    None
+    let mut safe_count = 0;
+
+    let reports: Vec<Vec<i32>> = input
+        .lines()
+        .map(|line| {
+            line.split_whitespace()
+                .map(|n| n.parse().unwrap())
+                .collect()
+        })
+        .collect();
+
+    for report in reports {
+        if is_safe(&report) {
+            safe_count += 1;
+            continue;
+        }
+
+        // check whether report can be made safe by removing exactly one level
+        // VERY NAIVE IMPLEMENTATION
+        for i in 0..report.len() {
+            let mut report_copy = report.clone();
+            report_copy.remove(i);
+            if is_safe(&report_copy) {
+                safe_count += 1;
+                break;
+            }
+        }
+    }
+
+    Some(safe_count)
 }
 
 #[cfg(test)]
@@ -76,6 +105,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(4));
     }
 }
