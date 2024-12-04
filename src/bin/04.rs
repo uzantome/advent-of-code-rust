@@ -68,7 +68,32 @@ fn follow_word(
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    None
+    let grid: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
+
+    let rows = grid.len();
+    let cols = grid[0].len();
+
+    let mut count = 0;
+
+    for r in 1..rows - 1 {
+        for c in 1..cols - 1 {
+            if grid[r][c] != 'A' {
+                continue;
+            }
+
+            let valid_tlbr = grid[r - 1][c - 1] == 'M' && grid[r + 1][c + 1] == 'S'
+                || (grid[r - 1][c - 1] == 'S' && grid[r + 1][c + 1] == 'M');
+
+            let valid_bltr = grid[r + 1][c - 1] == 'M' && grid[r - 1][c + 1] == 'S'
+                || grid[r + 1][c - 1] == 'S' && grid[r - 1][c + 1] == 'M';
+
+            if valid_tlbr && valid_bltr {
+                count += 1;
+            }
+        }
+    }
+
+    Some(count)
 }
 
 #[cfg(test)]
@@ -84,6 +109,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(9));
     }
 }
