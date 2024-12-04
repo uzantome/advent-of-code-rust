@@ -1,77 +1,70 @@
 advent_of_code::solution!(4);
 
-use itertools::Itertools;
-use regex::Regex;
-use std::collections::HashMap;
-
 pub fn part_one(input: &str) -> Option<u32> {
-    // Alternative way: find "X" and try to complete the word by "wandering" in all directions
+    //find "X" and try to complete the word by "wandering" in all directions
+    let directions = [
+        (0, 1),   // Right
+        (0, -1),  // Left
+        (1, 0),   // Down
+        (-1, 0),  // Up
+        (1, 1),   // Down-Right
+        (1, -1),  // Down-Left
+        (-1, 1),  // Up-Right
+        (-1, -1), // Up-Left
+    ];
 
     let grid: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
 
-    let mut search_space = extract_horizontal_lines(&grid);
-    search_space.extend(extract_vertical_lines(&grid));
-    search_space.extend(extract_tlbr_diagonals(&grid));
-    search_space.extend(extract_bltr_diagonals(&grid));
+    let rows = grid.len();
+    let cols = grid[0].len();
 
-    let search_pattern = Regex::new(r"XMAS|SAMX").unwrap();
+    let word: Vec<char> = "XMAS".chars().collect();
 
-    let count = search_space
-        .iter()
-        .map(|line| search_pattern.find_iter(line).count() as u32)
-        .sum();
+    let mut count = 0;
+
+    for r in 0..rows {
+        for c in 0..cols {
+            if grid[r][c] != 'X' {
+                continue;
+            }
+
+            for &(dr, dc) in &directions {
+                if follow_word(&grid, &word[1..], r, c, dr, dc) {
+                    count += 1;
+                }
+            }
+        }
+    }
 
     Some(count)
 }
 
-fn extract_horizontal_lines(grid: &[Vec<char>]) -> Vec<String> {
-    grid.iter().map(|row| row.iter().collect()).collect()
-}
+fn follow_word(
+    grid: &[Vec<char>],
+    word_residual: &[char],
+    r: usize,
+    c: usize,
+    dr: isize,
+    dc: isize,
+) -> bool {
+    let rows = grid.len() as isize;
+    let cols = grid[0].len() as isize;
 
-fn extract_vertical_lines(grid: &[Vec<char>]) -> Vec<String> {
-    let mut verticals = Vec::new();
-    let cols = grid[0].len();
-    for col in 0..cols {
-        let mut vertical = String::new();
-        for row in grid {
-            vertical.push(row[col]);
+    let mut r = r as isize;
+    let mut c = c as isize;
+
+    for i in 0..word_residual.len() {
+        r += dr;
+        c += dc;
+        if r < 0 || r >= rows || c < 0 || c >= cols {
+            return false;
         }
-        verticals.push(vertical);
-    }
-    verticals
-}
-
-fn extract_tlbr_diagonals(grid: &[Vec<char>]) -> Vec<String> {
-    let mut diagonals: HashMap<i32, Vec<char>> = HashMap::new();
-
-    for (i, row) in grid.iter().enumerate() {
-        for (j, &cell) in row.iter().enumerate() {
-            let diff = i as i32 - j as i32;
-            diagonals.entry(diff).or_default().push(cell);
+        if grid[r as usize][c as usize] != word_residual[i] {
+            return false;
         }
     }
 
-    diagonals
-        .into_iter()
-        .sorted_by_key(|&(k, _)| k)
-        .map(|(_, v)| v.into_iter().collect())
-        .collect()
-}
-
-fn extract_bltr_diagonals(grid: &[Vec<char>]) -> Vec<String> {
-    let mut diagonals: HashMap<i32, Vec<char>> = HashMap::new();
-
-    for (i, row) in grid.iter().enumerate() {
-        for (j, &cell) in row.iter().enumerate() {
-            diagonals.entry(i as i32 + j as i32).or_default().push(cell);
-        }
-    }
-
-    diagonals
-        .into_iter()
-        .sorted_by_key(|&(k, _)| k)
-        .map(|(_, v)| v.into_iter().collect())
-        .collect()
+    true
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
