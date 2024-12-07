@@ -44,7 +44,9 @@ fn is_solvable(test_value: u64, numbers: &[u32], index: usize) -> bool {
 }
 
 /// Checks whether the test value can be solved by combining the given numbers (in the given order) with ADD, MUL or CONCAT operations.
-/// works in the reverse way as is_solvable
+/// - works in the reverse way as is_solvable
+/// - in initial call `curr` must already be the first number (since ADD, MUL and CONCAT don't share
+///   a neutral element)
 fn is_solvable_2(test_value: u64, numbers: &[u32], index: usize, curr: u64) -> bool {
     if curr > test_value {
         return false;
@@ -89,7 +91,7 @@ pub fn part_two(input: &str) -> Option<u64> {
 
     let sum: u64 = equations
         .iter()
-        .filter(|(test_value, numbers)| is_solvable_2(*test_value, numbers, 0, 0))
+        .filter(|(test_value, numbers)| is_solvable_2(*test_value, numbers, 1, numbers[0] as u64))
         .map(|(test_value, _)| test_value)
         .sum();
 
