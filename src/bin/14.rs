@@ -117,7 +117,7 @@ pub fn part_two(input: &str) -> Option<u32> {
         let expected = total_robots as f32 / 4.0;
         let is = *quadrant_robot_counts.iter().max().unwrap() as f32;
 
-        if is > expected * 1.5 {
+        if is > expected * 1.8 {
             println!("Iteration: {}", iteration);
             for y in 0..height {
                 for x in 0..width {
